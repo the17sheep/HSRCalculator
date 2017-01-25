@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>任学律政借/贷款利息计算器--任学律政</title>
+		<link href="css/lyz.calendar.css" rel="stylesheet" type="text/css" />
+		<link href="css/bootstrap.min.css" rel="stylesheet" />
+		<script type="text/javascript" src="js/jquery-1.5.1.js"></script>
+		<script src="js/lyz.calendar.min.js" type="text/javascript"></script>
+		<script src="js/common.js" type="text/javascript"></script>
+		<script src="js/bootstrap.min.js" type="text/javascript"></script>
+
+		<!-- HTML5 Shim 和 Respond.js 用于让 IE8 支持 HTML5元素和媒体查询 -->
+		<!-- 注意： 如果通过 file://  引入 Respond.js 文件，则该文件无法起效果 -->
+		<!--[if lt IE 9]>
+         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+         <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+      	<![endif]-->
+	</head>
+	<style>
+		body {
+			text-align: center;
+		}
+		
+		th {
+			text-align: center;
+		}
+	</style>
+
+	<body>
+		<div class="container">
+			<div class="row">
+				<h2>任学律政借/贷款利息计算器</h2>
+			</div>
+			<div class="row">
+				<div class="col-md-3" style="padding-bottom:5px;">
+					<div class="input-group">
+						<span class="input-group-addon">&nbsp;&nbsp;&nbsp;&nbsp;总欠款：</span>
+						<input type="text" class="form-control" id="data_debt" />
+						<span class="input-group-addon">元</span>
+					</div>
+				</div>
+				<div class="col-md-3" style="padding-bottom:5px;">
+					<div class="input-group">
+						<span class="input-group-addon">年化利率：</span>
+						<input type="text" class="form-control" id="annual_rate" />
+						<span class="input-group-addon">%</span>
+					</div>
+				</div>
+				<div class="col-md-3" style="padding-bottom:5px;">
+					<div class="input-group">
+						<span class="input-group-addon">借款日期：</span>
+						<input type="text" class="form-control" id="date_debt" />
+					</div>
+				</div>
+				<div class="col-md-3" style="padding-bottom:5px;">
+					<div class="btn-group">
+						<button class="btn btn-default" id="data_save">保存</button>
+						<button class="btn btn-default" id="data_edit">编辑</button>
+					</div>
+				</div>
+			</div>
+			<hr />
+			<div class="row">
+				<table id="table_result" class="table table-bordered table-hover table-condensed">
+					<thead>
+						<tr>
+							<th>还款金额</th>
+							<th>还款日期</th>
+							<th>间隔天数</th>
+							<th>利息剩余</th>
+							<th>本金剩余</th>
+							<th>按天利率</th>
+						</tr>
+					</thead>
+					<tbody>
+
+					</tbody>
+				</table>
+			</div>
+			<hr />
+			<div class="row">
+				<div class="col-md-2"></div>
+				<div class="col-md-8">
+					<div class="col-md-4" style="padding-bottom:5px;">
+						<div class="input-group">
+							<span class="input-group-addon">&nbsp;&nbsp;&nbsp;&nbsp;还款额:</span>
+							<input type="text" class="form-control" id="refund" />
+							<span class="input-group-addon">元</span>
+						</div>
+					</div>
+					<div class="col-md-4" style="padding-bottom:5px;">
+						<div class="input-group">
+							<span class="input-group-addon">还款日期:</span>
+							<input class="form-control" id="date_refund" />
+						</div>
+					</div>
+					<div class="col-md-4" style="padding-bottom:5px;">
+						<button type="button" class="btn btn-default" id="count">计算</button>
+					</div>
+				</div>
+				<div class="col-md-2"></div>
+			</div>
+			<div class="row">
+				<div class="col-md-3"></div>
+				<div class="col-md-6">
+					<div class="col-md-6" style="padding-bottom:5px;">
+						<div style="text-align: center;padding-top: 100px;">
+							使用说明和更多好东东请关注 任学律政（taskstudy_law)公众号
+						</div>
+					</div>
+					<div class="col-md-6" style="padding-bottom:5px;" align="center">
+						<img src="images/rxflzx.jpg" class="img-responsive" />
+					</div>
+				
+				</div>
+				<div class="col-md-3"></div>
+			</div>
+			<div>本产品版权归任学律政所有，未经允许不得用于商业盈利活动。</div>
+		</div>
+	</body>
+
+</html>
+
+<script>
+	var var_totle_debt = 0; //总欠款
+	var var_annual_rate = 0; //年化利率
+	var var_day_rate = 0; //折算日利率
+	var var_date_debt = 0; //贷款日期
+	var var_lastdate_refund = ''; //上次还款日期
+	var var_debt_surplus = 0; //剩余欠款
+	var var_interest_surplus = 0; //利息剩余
+	var var_switch = 0; //表格颜色开关
+	$(
+		function()
+		{
+			$("#date_debt").calendar();
+			$("#date_refund").calendar();
+		}
+	);
+	$("#data_save").click(function()
+	{
+		var_totle_debt = $("#data_debt").attr("readonly", "readonly").val();
+		var_annual_rate = $("#annual_rate").attr("readonly", "readonly").val();
+		var_date_debt = $("#date_debt").attr("readonly", "readonly").val();
+		var_day_rate = (var_annual_rate / 365).toFixed(5);
+		var_debt_surplus = var_totle_debt;
+		var_lastdate_refund = var_date_debt;
+
+	});
+
+	$("#data_edit").click(function()
+	{
+		$("#data_debt").removeAttr("readonly");
+		$("#annual_rate").removeAttr("readonly");
+		$("#date_debt").removeAttr("readonly");
+	});
+
+	$("#count").click(function()
+	{
+		var var_refund = $("#refund").val(); //还款金额
+		var var_date_refund = $("#date_refund").val(); //还款日期
+		var var_date_differ = DateDiff(var_lastdate_refund, var_date_refund); //间隔天数
+		var var_interest = Math.round(var_debt_surplus * var_day_rate * var_date_differ / 100); //产生的利息
+		var_interest_surplus = var_interest_surplus + var_interest; //利息累计
+		if(var_refund >= var_interest_surplus)
+		{ //还款金额大于利息
+			var_debt_surplus = var_debt_surplus - var_refund + var_interest_surplus; //剩余本金
+			var_interest_surplus = 0;
+		}
+		else
+		{
+			var_interest_surplus = var_interest_surplus - var_refund; //利息未还完
+		}
+		if(var_date_differ > 0)
+		{ //如果等于0就表示当天多笔还款，一般不会出现
+			var_lastdate_refund = var_date_refund;
+		}
+		if(var_switch == 0)
+		{
+			var newRow = "<tr class='info'><td>" + var_refund +
+				"</td><td>" + var_date_refund +
+				"</td><td>" + var_date_differ +
+				"</td><td>" + var_interest_surplus +
+				"</td><td>" + var_debt_surplus +
+				"</td><td>" + var_day_rate +
+				"</td></tr>";
+			var_switch = 1;
+		}
+		else
+		{
+			var newRow = "<tr class='success'><td>" + var_refund +
+				"</td><td>" + var_date_refund +
+				"</td><td>" + var_date_differ +
+				"</td><td>" + var_interest_surplus +
+				"</td><td>" + var_debt_surplus +
+				"</td><td>" + var_day_rate +
+				"</td></tr>";
+			var_switch = 0;
+		}
+
+		$("#table_result tr:last").after(newRow);
+	});
+</script>
